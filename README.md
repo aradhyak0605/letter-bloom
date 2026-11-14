@@ -5,9 +5,9 @@ A portrait, touch-first word game. Built with plain HTML, CSS and JavaScript; no
 ## Play
 - A run starts with one of five randomly chosen playable three-letter sets.
 - Connect letter tiles by dragging, or tap tiles and check the word. Keyboard entry is supported.
-- Find 3 words to gain a random fourth letter. Goals gradually increase up to 8 words per addition.
-- Existing tiles remain. A new tile is selected from letters that preserve enough unused dictionary words for the next stage.
-- Three wrong words end the entire run. Short and repeated words are free.
+- Find 3 words to gain a random fourth letter. After that, each word must use every tile: four tiles require four-letter words. Goals adapt to the available full-length anagrams (at most 8), so a stage never requires more words than exist.
+- Existing tiles remain. A new tile is selected only from additions with a playable path through all remaining stages to nine tiles.
+- Three wrong words end the entire run. Wrong-length and repeated words are free. Trace backwards to undo; release in empty space to cancel.
 - Consecutive correct words increase the points multiplier, capped at 3x.
 - Four letters unlock shuffle, five unlock three hints per garden, six permanently unlock Night.
 - Completing the nine-letter stage starts a fresh garden while retaining score and lives.
@@ -15,7 +15,7 @@ A portrait, touch-first word game. Built with plain HTML, CSS and JavaScript; no
 
 ## Develop
 Serve `dist` with any static server, e.g. `python -m http.server 8000 --directory dist`.
-Run `node tests/game.test.cjs` for game rules and solvability checks.
+Run `node tests/game.test.cjs && node tests/gestures.test.cjs` for game rules and solvability checks.
 
 ## Files
 - `dist/index.html`: full-height portrait interface, pop-up menus, responsive styles.
@@ -33,3 +33,5 @@ Run `node tests/game.test.cjs` for game rules and solvability checks.
 6. Only then integrate ads; keep the core game independent of an ad SDK, and review provider requirements before release. No ad network, tracking, payments or analytics are currently included.
 
 This is a playable web-game prototype, not a native Android/iOS package. Daily mode uses the same starting set per local date; later letters depend on play history. Web-app manifest support varies by browser; no offline caching yet.
+
+Version 2 uses separate run saves because the word-length rules changed; the existing personal best and unlocked themes are retained.
