@@ -23,3 +23,11 @@ for(let i=0;i<100;i++){
 }
 run("fresh('daily');globalThis.seedA=s.letters.join('');fresh('daily')");assert.equal(run('s.letters.join("")'),run('seedA'));
 console.log('PASS: scoring, duplicate/short protection, third-miss game over, tile multiplicity, random growth preservation, 100 solvable exact-length full runs, shorter words rejected without penalty, daily seed.');
+
+// Regression: partial drags used to survive pointerup and poison the next word.
+run("pointerHit=()=>1;pointerPoint=()=>({x:0,y:0});drawSelection=()=>{};fresh('classic');s.letters=['E','A','T'];selection=[0,1];drag={id:7,moved:true,startedAt:Date.now(),start:0,before:[]};pointerEnd({pointerId:7})");
+assert.equal(run('selection.length'),0);assert.equal(run('s.lives'),3);
+run("selection=[0];drag={id:7,moved:false,startedAt:Date.now()-500,start:0,before:[]};pointerEnd({pointerId:7})");assert.equal(run('selection.length'),0);
+run("selection=[0,1];drag={id:7,before:[0]};pointerCancel({pointerId:7})");assert.equal(run('selection.length'),0);
+run("selection=[2];drag={id:7,moved:false,start:0,startX:0,startY:0,last:0};pointerMove({pointerId:7,clientX:20,clientY:20})");assert.equal(run('selection.includes(2)'),false);
+console.log('PASS: partial release, long hold, cancellation and new-swipe stale-selection regression.');

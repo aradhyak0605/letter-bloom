@@ -45,7 +45,7 @@ function select(i,fromDrag=false){if(s.over)return;selection=BloomTrace.follow(s
 function clear(){selection=[];drawSelection()}
 function submit(){if(s.over)return;const word=selection.map(i=>s.letters[i]).join('').toLowerCase();if(word.length!==s.letters.length){message(`Use all ${s.letters.length} letters for this level. No life lost.`);return}if(s.found.includes(word)){message('Already growing in your garden. Try another!');clear();return}if(!WORDS.has(word)){s.lives--;s.streak=0;clear();render();message(`${word.toUpperCase()} isn’t in the word list. ${s.lives} ${s.lives===1?'life':'lives'} left.`,'error');if(s.lives===0){s.over=true;save();endGame()}return}s.score+=word.length*10*Math.min(3,1+Math.floor(s.streak/3));s.streak++;s.found.push(word);s.stageCount++;preferences.best=Math.max(preferences.best,s.score);let msg=`${word.toUpperCase()} · lovely find!`;if(s.stageCount>=quota(s.letters.length)){if(s.letters.length<9){const newLetter=addLetter();msg=`✦ ${newLetter} joined your letters! ${s.letters.length===4?'Shuffle unlocked.':s.letters.length===5?'Hints unlocked.':s.letters.length===6?'Night theme unlocked.':'Keep growing.'}`}else{s.round++;s.letters=playableSeeds[Math.floor(random()*playableSeeds.length)].split('');s.found=[];s.stageCount=0;s.hints=3;msg=`✳ Garden ${s.round}! Fresh letters, same score and lives.`}}clear();render();message(msg,'good');if(navigator.vibrate)navigator.vibrate(20)}
 let previousFocus=null;
-function modal(html){previousFocus=document.activeElement;drag=null;drawSelection();$('modal').innerHTML=html;$('overlay').classList.remove('hidden');document.querySelector('main').inert=true;document.querySelector('header').inert=true;$('modal').querySelector('button')?.focus()}
+function modal(html){previousFocus=document.activeElement;drag=null;clear();$('modal').innerHTML=html;$('overlay').classList.remove('hidden');document.querySelector('main').inert=true;document.querySelector('header').inert=true;$('modal').querySelector('button')?.focus()}
 function closeModal(){$('overlay').classList.add('hidden');document.querySelector('main').inert=false;document.querySelector('header').inert=false;previousFocus?.focus()}
 function endGame(){const missed=possible().slice(0,5);modal(`<div style="font-size:38px">✳</div><div class="eyebrow">Your garden grew beautifully</div><h2>A little pause.<br>A new beginning.</h2><div class="modal-score">${s.score}</div><div class="eyebrow">points · ${s.found.length} words this garden</div><p>${missed.length?'A few words you could have found: <b>'+missed.join(', ').toUpperCase()+'</b>.':'A fresh set of letters is waiting.'}</p><button class="submit" id="again">${mode==='daily'?'Practise today’s seed':'Grow again'} ↗</button><button class="restart" id="dismiss">View my garden</button>`);$('again').onclick=()=>{fresh(mode);closeModal();render();message('A fresh garden. Make it yours.')};$('dismiss').onclick=closeModal}
 function restart(){modal('<div style="font-size:35px">↻</div><h2>Plant a fresh seed?</h2><p>This restarts your current run. Your personal best and unlocked themes stay yours.</p><button class="submit" id="confirm-reset">Start fresh</button><button class="restart" id="cancel-reset">Keep playing</button>');$('confirm-reset').onclick=()=>{fresh(mode);closeModal();render();message('Your next word adventure starts here.')};$('cancel-reset').onclick=closeModal}
@@ -55,24 +55,28 @@ function pointerStart(e){
   if(drag||s.over||e.button>0)return;
   const b=e.target.closest('.letter');if(!b)return;e.preventDefault();
   const i=Number(b.dataset.index);
-  drag={id:e.pointerId,startX:e.clientX,startY:e.clientY,moved:false,last:i,before:[...selection],start:i,cursor:pointerPoint(e)};
+  drag={id:e.pointerId,startX:e.clientX,startY:e.clientY,moved:false,startedAt:Date.now(),last:i,before:[...selection],start:i,cursor:pointerPoint(e)};
   select(i,true);$('wheel').setPointerCapture(e.pointerId);drawSelection();
 }
 function pointerMove(e){
   if(!drag||drag.id!==e.pointerId)return;
-  if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>8)drag.moved=true;
+  if(!drag.moved&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>8){drag.moved=true;selection=[drag.start]}
   drag.cursor=pointerPoint(e);const i=pointerHit(e);
   if(i>=0&&i!==drag.last)select(i,true);
   drag.last=i;drawSelection();
 }
 function pointerEnd(e){
   if(!drag||drag.id!==e.pointerId)return;
-  const action=BloomTrace.release(drag.moved,pointerHit(e),selection.length);if(action==='tap')selection=BloomTrace.follow(drag.before,drag.start,true);drag=null;
-  if(action==='cancel'){clear();message('Selection cleared. No life lost.');}
-  else if(action==='submit')submit();
-  drawSelection();
+  const hit=pointerHit(e);
+  const isGesture=drag.moved||Date.now()-drag.startedAt>=220||hit!==drag.start;
+  if(!isGesture){selection=BloomTrace.follow(drag.before,drag.start,true);drag=null;drawSelection();return}
+  drag=null;
+  try{
+    if(hit>=0&&selection.length===s.letters.length)submit();
+    else message('Swipe cleared. Try a fresh word!');
+  }finally{clear()}
 }
-function pointerCancel(e){if(drag&&drag.id===e.pointerId){selection=drag.before;drag=null;drawSelection()}}
+function pointerCancel(e){if(drag&&drag.id===e.pointerId){drag=null;clear()}}
 $('wheel').addEventListener('pointerdown',pointerStart);
 $('wheel').addEventListener('pointermove',pointerMove);
 $('wheel').addEventListener('pointerup',pointerEnd);
@@ -84,8 +88,11 @@ $('help').onclick=()=>{modal('<div style="font-size:35px">✳</div><h2>Let your 
 $('restart').onclick=restart;$('mobile-reset').onclick=restart;$('classic').onclick=()=>load('classic');$('daily').onclick=()=>{load('daily');message('Today’s seed · '+dayKey()+'. Your run saves separately.')};
 document.querySelectorAll('.theme-btn').forEach(b=>b.onclick=()=>{if(b.dataset.theme==='night'&&!preferences.night){message('Reach 6 letters to unlock Night forever.');return}preferences.theme=b.dataset.theme;render()});
 document.addEventListener('keydown',e=>{if(!$('overlay').classList.contains('hidden')){if(e.key==='Escape')closeModal();if(e.key==='Tab'){const buttons=[...$('modal').querySelectorAll('button:not(:disabled)')];const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}return}if(e.key==='Enter'){e.preventDefault();submit()}else if(e.key==='Backspace'){e.preventDefault();selection.pop();drawSelection()}else if(e.key==='Escape')clear();else if(/^[a-z]$/i.test(e.key)){const i=s.letters.findIndex((l,j)=>l===e.key.toUpperCase()&&!selection.includes(j));if(i>=0)select(i)}});
-window.addEventListener('resize',()=>{drag=null;drawWheel()});load('classic');if(!s.over)message(s.found.length?'Welcome back. Your garden is right here.':'Use every tile. Trace back to undo.');
+window.addEventListener('resize',()=>{drag=null;selection=[];drawWheel()});load('classic');if(!s.over)message(s.found.length?'Welcome back. Your garden is right here.':'Use every tile. Trace back to undo.');
 $('garden-open').onclick=()=>{modal('<div class="eyebrow">YOUR WORD GARDEN</div><h2>'+s.found.length+' words found</h2><div class="words">'+s.found.map(w=>'<span class="chip">'+w.toUpperCase()+'</span>').join('')+'</div><p>Personal best: <b>'+preferences.best+'</b> points<br>Garden '+s.round+' · '+s.letters.length+' letters</p><button class="submit" id="back-game">Keep growing ↗</button>');$('back-game').onclick=closeModal};
 $('style-open').onclick=()=>{modal('<div class="eyebrow">MAKE IT YOURS</div><h2>Your atmosphere</h2><div class="theme-row"><button class="theme-btn" id="pick-garden"><span class="theme-dot" style="background:#b8cf8b"></span>Garden</button><button class="theme-btn" id="pick-peach"><span class="theme-dot" style="background:#dfa289"></span>Peach</button><button class="theme-btn" id="pick-night"><span class="theme-dot" style="background:#354657"></span>Night '+(preferences.night?'':'🔒')+'</button></div><p>Shuffle opens at 4 letters. Hints at 5. Reach 6 letters to unlock Night forever.<br><br>Progress saves automatically on this device.</p><button class="submit" id="style-done">Back to my garden</button>');for(const theme of ['garden','peach','night'])$('pick-'+theme).onclick=()=>{if(theme==='night'&&!preferences.night){$('pick-night').textContent='Reach 6 letters';return}preferences.theme=theme;render()};$('style-done').onclick=closeModal};
 
 $('overlay').addEventListener('click',e=>{if(e.target===$('overlay'))closeModal()});
+
+window.addEventListener('blur',()=>{drag=null;clear()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){drag=null;clear()}});

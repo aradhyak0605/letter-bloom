@@ -14,3 +14,9 @@
 - Layout: 360 × 640 with nine tiles and 390 × 844 with four tiles.
 - Deployment: published successfully on 14 November 2026.
 
+## Colour-pop update
+
+- [x] Clear partial drags, long holds and cancelled gestures; start each swipe without stale tap selections.
+- [ ] Expand random puzzle pool and avoid immediate repeats.
+- [ ] Replace minimalist styling with a colourful, chunky mobile-game UI.
+- [ ] Verify and publish.
