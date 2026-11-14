@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),trace=require('../dist/gestures.js');
+assert.equal(trace.points([0,1],[{x:10,y:20},{x:30,y:40}],{x:65,y:80}),'10,20 30,40 65,80');
+assert.equal(trace.points([],[{x:10,y:20}],{x:65,y:80}),'');
+assert.deepEqual(trace.follow([0,1,2],1),[0,1]);
+assert.deepEqual(trace.follow([0,1,2],0),[0]);
+assert.deepEqual(trace.follow([0,1],1),[0,1]);
+assert.deepEqual(trace.follow([0,1],1,true),[0]);
+assert.deepEqual(trace.follow([0],1),[0,1]);
+assert.equal(trace.release(true,-1,3),'cancel');
+assert.equal(trace.release(true,2,3),'submit');
+assert.equal(trace.release(false,0,1),'tap');
+assert.equal(trace.hit({x:100,y:100},[{x:10,y:10}],25),-1);
+console.log('PASS: live finger tail, stepwise/full backtracking, repeated tile re-entry, tap undo, off-tile release cancellation.');
