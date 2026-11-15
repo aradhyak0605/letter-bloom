@@ -13,4 +13,4 @@
 - [x] Preserve three lives and exact-length words; classic progress migration.
 - [x] Automated coverage: 100 Classic runs, all 30 Adventure levels, rewards, hints and gesture rules.
 - [x] Browser checks: 360 × 640 and 390 × 844, swipe release, hints, scoring and level unlock.
-- [ ] Publish the new version and sync GitHub.
+- [x] Published successfully and synced GitHub on 15 November 2026.
