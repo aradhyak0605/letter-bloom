@@ -1,22 +1,16 @@
-# Current improvement checklist
+# Letter Bloom checklist
 
-- [x] Connecting line follows the finger between letters.
-- [x] Trace back through earlier letters to undo; release away from tiles to clear without losing a life.
-- [x] Require words to use every tile at the current level; guarantee solvable growth.
-- [x] Improve touch feedback, word-length guidance and mobile layout.
-- [x] Run regression checks and publish the updated game.
+## Game expansion — 15 November 2026
 
-## Verification
-
-- Game rules: 100 generated runs, exact-length enforcement, unchanged existing letters, no impossible stage targets, scoring, duplicate handling and third-miss game over.
-- Gestures: live pointer tail, backtracking, tap undo and off-tile cancellation.
-- Browser: tap entry, backtracking from EAT to EA, cancellation with lives unchanged, transition to four-letter mode.
-- Layout: 360 × 640 with nine tiles and 390 × 844 with four tiles.
-- Deployment: published successfully on 14 November 2026.
-
-## Colour-pop update
-
-- [x] Clear partial drags, long holds and cancelled gestures; start each swipe without stale tap selections.
-- [ ] Expand random puzzle pool and avoid immediate repeats.
-- [ ] Replace minimalist styling with a colourful, chunky mobile-game UI.
-- [ ] Verify and publish.
+- [x] Colourful portrait home screen with Classic, Adventure and Daily modes.
+- [x] Adventure map: 30 playable levels across Candy Coast, Jungle Jam and Cosmic Carnival.
+- [x] Three-star level results, sequential unlocks and saved progress.
+- [x] Five missions, earned coins and three equipable themes.
+- [x] Chunky multicoloured tiles, mascot, sound toggle and celebration effects.
+- [x] Expand to 191 viable random starting sets; avoid consecutive Classic repeats.
+- [x] Progressive hints show a persistent clue and numbered tiles; handle repeated letters.
+- [x] Clear partial swipes and cancelled gestures; live trace and backtracking.
+- [x] Preserve three lives and exact-length words; classic progress migration.
+- [x] Automated coverage: 100 Classic runs, all 30 Adventure levels, rewards, hints and gesture rules.
+- [x] Browser checks: 360 × 640 and 390 × 844, swipe release, hints, scoring and level unlock.
+- [ ] Publish the new version and sync GitHub.

@@ -1,37 +1,32 @@
 # Letter Bloom
 
-A portrait, touch-first word game. Built with plain HTML, CSS and JavaScript; no build step or paid services.
+A portrait mobile word game. Connect every tile to make words, unlock letters and grow your score. Three wrong words end a run; short entries and repeats do not cost lives.
 
-## Play
-- A run starts with one of five randomly chosen playable three-letter sets.
-- Connect letter tiles by dragging, or tap tiles and check the word. Keyboard entry is supported.
-- Find 3 words to gain a random fourth letter. After that, each word must use every tile: four tiles require four-letter words. Goals adapt to the available full-length anagrams (at most 8), so a stage never requires more words than exist.
-- Existing tiles remain. A new tile is selected only from additions with a playable path through all remaining stages to nine tiles.
-- Three wrong words end the entire run. Wrong-length and repeated words are free. Trace backwards to undo; release in empty space to cancel.
-- Consecutive correct words increase the points multiplier, capped at 3x.
-- Four letters unlock shuffle, five unlock three hints per garden, six permanently unlock Night.
-- Completing the nine-letter stage starts a fresh garden while retaining score and lives.
-- Classic and local-date Daily Seed runs save independently on the device.
+## Play modes
 
-## Develop
-Serve `dist` with any static server, e.g. `python -m http.server 8000 --directory dist`.
-Run `node tests/game.test.cjs && node tests/gestures.test.cjs` for game rules and solvability checks.
+- **Classic:** endless randomized growth from 3 to 9 letters; completing nine tiles starts another round. 191 viable starting sets with no immediate repeat.
+- **Adventure:** 30 sequential levels across three worlds. Early levels finish at three letters; later levels grow up to eight. Earn up to three stars based on remaining lives. Replays improve stars; completion coins are paid once.
+- **Daily:** a date-seeded run from three to six letters, with a once-per-date completion reward.
 
-## Files
-- `dist/index.html`: full-height portrait interface, pop-up menus, responsive styles.
-- `dist/game.js`: state, interactions, random growth, persistence, scoring.
-- `dist/words.js`: bundled English word set.
-- `dist/manifest.webmanifest`: standalone portrait web-app metadata.
-- `dist/THIRD_PARTY_NOTICES.txt`: word-data acknowledgements and notices.
+Home, map and rewards screens make up the game hub. Five missions award coins, which unlock cosmetic themes without payments. Every accepted word earns two coins. Classic shuffle unlocks at four tiles and hints at five; Adventure and Daily hints are available from the start.
 
-## Next development milestones
-1. Test swiping, small-screen layout and pacing on real Android/iPhone devices.
-2. Refine the dictionary with a modern game-word list and a common-word pool for hints and difficulty. Current Webster-derived vocabulary includes obscure/dated entries and is not a tournament dictionary.
-3. Expand starting sets, add milestone animation/audio settings, accessibility settings and onboarding.
-4. Add daily completion goals, cosmetic achievements and optional challenge modes after retention testing.
-5. Add install/offline support, cloud saves and a signed-in leaderboard if desired. Current scores are local, editable and not suitable for competitive rewards.
-6. Only then integrate ads; keep the core game independent of an ad SDK, and review provider requirements before release. No ad network, tracking, payments or analytics are currently included.
+Hints reveal one third of the same unfound word at a time, with persistent numbered tiles, and never select tiles for the player. A hint run has three charges. Swipe backwards to undo; release off a tile or with a partial word to clear. Quick taps support accessible word construction followed by Check word. Keyboard letters, Backspace and Enter work too.
 
-This is a playable web-game prototype, not a native Android/iOS package. Daily mode uses the same starting set per local date; later letters depend on play history. Web-app manifest support varies by browser; no offline caching yet.
+## Data and limitations
 
-Version 2 uses separate run saves because the word-length rules changed; the existing personal best and unlocked themes are retained.
+Progress is local to this browser/device. Existing v2 Classic runs and personal bests migrate on first use. No accounts, purchases, ads or leaderboard backend are included. Daily dates follow the device's local date. The built-in dictionary includes uncommon words; puzzle selection guarantees solvable full-length goals and a growth path, not exclusively everyday vocabulary.
+
+## Development
+
+Buildless HTML, CSS and JavaScript in `dist/`. `engine.js` indexes the dictionary and handles puzzle/hint rules; `game.js` handles screens, interactions and storage; `gestures.js` contains pure trace helpers. `.openai/hosting.json` declares static hosting.
+
+Validation:
+
+```sh
+node --check dist/game.js
+node --check dist/engine.js
+node tests/game.test.cjs
+node tests/gestures.test.cjs
+```
+
+See `dist/THIRD_PARTY_NOTICES.txt` for word-list licensing. Fonts use Google Fonts with local system fallbacks. See `CHANGELOG.md` for the completion checklist.
